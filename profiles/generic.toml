@@ -1,0 +1,37 @@
+[profile]
+name = "generic"
+description = "Common secret patterns across all ecosystems"
+
+deny_paths = [
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.production",
+    ".env.staging",
+    ".env.test",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "credentials.json",
+    "credentials.yaml",
+    "secrets.json",
+    "secrets.yaml",
+    "serviceAccountKey.json",
+    ".npmrc",
+    ".pypirc",
+    "terraform.tfvars",
+    "*.auto.tfvars",
+]
+
+deny_env_patterns = [
+    "*_SECRET",
+    "*_KEY",
+    "*_TOKEN",
+    "*_PASSWORD",
+    "AWS_*",
+    "AZURE_*",
+    "GCP_*",
+    "DATABASE_URL",
+    "REDIS_URL",
+]

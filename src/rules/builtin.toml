@@ -1,0 +1,200 @@
+# secretfence — Built-in secret detection rules
+# Content patterns matched against file contents via regex
+
+[[content_rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'
+
+[[content_rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = "(?i)aws_secret_access_key\\s*[:=]\\s*[\"']?[A-Za-z0-9/+=]{40}"
+
+[[content_rules]]
+id = "github-token"
+description = "GitHub Personal Access Token"
+regex = 'gh[pousr]_[A-Za-z0-9_]{36,255}'
+
+[[content_rules]]
+id = "github-oauth"
+description = "GitHub OAuth Access Token"
+regex = 'gho_[A-Za-z0-9]{36,255}'
+
+[[content_rules]]
+id = "github-fine-grained"
+description = "GitHub Fine-Grained Personal Access Token"
+regex = 'github_pat_[A-Za-z0-9_]{22,255}'
+
+[[content_rules]]
+id = "generic-api-key"
+description = "Generic API Key assignment"
+regex = "(?i)(api[_-]?key|apikey)\\s*[:=]\\s*[\"']?[A-Za-z0-9]{20,64}[\"']?"
+
+[[content_rules]]
+id = "generic-secret"
+description = "Generic Secret assignment"
+regex = "(?i)(secret|password|passwd|pwd)\\s*[:=]\\s*[\"']?[^\\s\"']{8,64}[\"']?"
+
+[[content_rules]]
+id = "private-key-pem"
+description = "PEM-encoded private key"
+regex = '-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
+
+[[content_rules]]
+id = "jwt-token"
+description = "JSON Web Token"
+regex = 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'
+
+[[content_rules]]
+id = "slack-token"
+description = "Slack Bot/User/Workspace Token"
+regex = 'xox[bporas]-[0-9]{10,13}-[0-9]{10,13}[a-zA-Z0-9-]*'
+
+[[content_rules]]
+id = "slack-webhook"
+description = "Slack Webhook URL"
+regex = 'https://hooks\.slack\.com/services/T[A-Z0-9]{8,}/B[A-Z0-9]{8,}/[A-Za-z0-9]{24}'
+
+[[content_rules]]
+id = "stripe-secret-key"
+description = "Stripe Secret Key"
+regex = 'sk_live_[A-Za-z0-9]{24,}'
+
+[[content_rules]]
+id = "stripe-restricted-key"
+description = "Stripe Restricted Key"
+regex = 'rk_live_[A-Za-z0-9]{24,}'
+
+[[content_rules]]
+id = "google-api-key"
+description = "Google API Key"
+regex = 'AIza[0-9A-Za-z_-]{35}'
+
+[[content_rules]]
+id = "gcp-service-account"
+description = "GCP Service Account Key"
+regex = "\"type\"\\s*:\\s*\"service_account\""
+
+[[content_rules]]
+id = "heroku-api-key"
+description = "Heroku API Key"
+regex = '(?i)heroku.*[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+
+[[content_rules]]
+id = "sendgrid-api-key"
+description = "SendGrid API Key"
+regex = 'SG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}'
+
+[[content_rules]]
+id = "twilio-api-key"
+description = "Twilio API Key"
+regex = 'SK[0-9a-fA-F]{32}'
+
+[[content_rules]]
+id = "npm-token"
+description = "npm Access Token"
+regex = 'npm_[A-Za-z0-9]{36}'
+
+[[content_rules]]
+id = "pypi-token"
+description = "PyPI API Token"
+regex = 'pypi-[A-Za-z0-9_-]{100,}'
+
+[[content_rules]]
+id = "telegram-bot-token"
+description = "Telegram Bot Token"
+regex = '[0-9]{8,10}:[A-Za-z0-9_-]{35}'
+
+[[content_rules]]
+id = "discord-bot-token"
+description = "Discord Bot Token"
+regex = '(?i)(discord|bot).*[MN][A-Za-z0-9]{23,}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27,}'
+
+[[content_rules]]
+id = "mailgun-api-key"
+description = "Mailgun API Key"
+regex = 'key-[0-9a-zA-Z]{32}'
+
+[[content_rules]]
+id = "database-url"
+description = "Database Connection String"
+regex = "(?i)(postgres|mysql|mongodb|redis|amqp)://[^\\s\"'<>]{10,}"
+
+[[content_rules]]
+id = "azure-storage-key"
+description = "Azure Storage Account Key"
+regex = '(?i)AccountKey=[A-Za-z0-9+/=]{86,}'
+
+[[content_rules]]
+id = "openai-api-key"
+description = "OpenAI API Key"
+regex = 'sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}'
+
+[[content_rules]]
+id = "anthropic-api-key"
+description = "Anthropic API Key"
+regex = 'sk-ant-[A-Za-z0-9_-]{90,}'
+
+[[content_rules]]
+id = "linear-api-key"
+description = "Linear API Key"
+regex = 'lin_api_[A-Za-z0-9]{40}'
+
+# Path rules — file paths that typically contain secrets
+[[path_rules]]
+id = "dotenv"
+description = "Environment variable files"
+patterns = [".env", ".env.local", ".env.development", ".env.production", ".env.staging", ".env.test"]
+allow = [".env.example", ".env.sample", ".env.template"]
+
+[[path_rules]]
+id = "private-keys"
+description = "Private key files"
+patterns = ["*.pem", "*.key", "*.p12", "*.pfx", "*.jks", "*.keystore"]
+
+[[path_rules]]
+id = "ssh-keys"
+description = "SSH key files"
+patterns = ["id_rsa", "id_ed25519", "id_ecdsa", "id_dsa", "*.pub"]
+
+[[path_rules]]
+id = "credentials"
+description = "Credential and secret files"
+patterns = ["credentials.json", "credentials.yaml", "credentials.yml", "secrets.json", "secrets.yaml", "secrets.yml", "secret.json", "secret.yaml"]
+
+[[path_rules]]
+id = "cloud-config"
+description = "Cloud provider config files"
+patterns = [".aws/credentials", ".aws/config", "serviceAccountKey.json", ".gcp-credentials.json"]
+
+[[path_rules]]
+id = "package-auth"
+description = "Package manager auth files"
+patterns = [".npmrc", ".pypirc", ".gem/credentials", ".cargo/credentials.toml"]
+
+[[path_rules]]
+id = "terraform"
+description = "Terraform variable files with secrets"
+patterns = ["terraform.tfvars", "*.auto.tfvars", "terraform.tfvars.json"]
+
+[[path_rules]]
+id = "docker-env"
+description = "Docker environment files"
+patterns = [".env.docker", "docker-compose.override.yml"]
+
+[[path_rules]]
+id = "ci-secrets"
+description = "CI/CD secret files"
+patterns = [".travis.yml", ".github/workflows/*.yml"]
+allow = []
+
+[[path_rules]]
+id = "cert-files"
+description = "Certificate files"
+patterns = ["*.crt", "*.cert", "*.ca-bundle"]
+
+[[path_rules]]
+id = "backup-env"
+description = "Backup copies of env files"
+patterns = [".env.bak", ".env.backup", ".env.old", "*.env"]

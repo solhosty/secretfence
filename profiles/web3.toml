@@ -1,0 +1,40 @@
+[profile]
+name = "web3"
+description = "Foundry, Hardhat, and blockchain development"
+
+deny_paths = [
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.production",
+    ".env.staging",
+    ".env.test",
+    "foundry.toml",
+    "hardhat.config.js",
+    "hardhat.config.ts",
+    "hardhat.config.mjs",
+    ".secret",
+    "mnemonic.txt",
+    "mnemonic",
+    "*.pem",
+    "*.key",
+    "deploy-key.*",
+    "brownie-config.yaml",
+    "truffle-config.js",
+]
+
+deny_env_patterns = [
+    "PRIVATE_KEY",
+    "MNEMONIC",
+    "SEED_PHRASE",
+    "DEPLOYER_*",
+    "ETHERSCAN_*",
+    "ALCHEMY_*",
+    "INFURA_*",
+    "RPC_URL",
+    "*_RPC_URL",
+    "*_SECRET",
+    "*_KEY",
+    "*_TOKEN",
+    "*_PASSWORD",
+]

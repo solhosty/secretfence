@@ -1,0 +1,77 @@
+# secretfence — Web3-specific secret detection rules
+
+[[content_rules]]
+id = "eth-private-key"
+description = "Ethereum private key (64 hex chars)"
+regex = "(?i)(private[_-]?key|priv[_-]?key|secret[_-]?key)\\s*[:=]\\s*[\"']?(0x)?[0-9a-fA-F]{64}"
+
+[[content_rules]]
+id = "eth-private-key-bare"
+description = "Bare Ethereum private key (0x-prefixed 64 hex)"
+regex = '0x[0-9a-fA-F]{64}'
+
+[[content_rules]]
+id = "mnemonic-phrase"
+description = "BIP39 mnemonic seed phrase (12 or 24 words)"
+regex = "(?i)(mnemonic|seed[_-]?phrase|recovery[_-]?phrase)\\s*[:=]\\s*[\"']?(\\w+\\s+){11,23}\\w+"
+
+[[content_rules]]
+id = "etherscan-api-key"
+description = "Etherscan API Key"
+regex = "(?i)(etherscan[_-]?api[_-]?key|etherscan[_-]?key)\\s*[:=]\\s*[\"']?[A-Za-z0-9]{34}"
+
+[[content_rules]]
+id = "infura-api-key"
+description = "Infura Project ID / API Key"
+regex = "(?i)(infura[_-]?(?:api[_-]?)?key|infura[_-]?project[_-]?id)\\s*[:=]\\s*[\"']?[A-Za-z0-9]{32}"
+
+[[content_rules]]
+id = "alchemy-api-key"
+description = "Alchemy API Key"
+regex = "(?i)(alchemy[_-]?(?:api[_-]?)?key)\\s*[:=]\\s*[\"']?[A-Za-z0-9_-]{32}"
+
+[[content_rules]]
+id = "rpc-url-with-key"
+description = "RPC URL containing an API key"
+regex = 'https?://[^/]*(infura|alchemy|quicknode|ankr|moralis|chainstack)[^/]*/[A-Za-z0-9_-]{20,}'
+
+[[content_rules]]
+id = "foundry-private-key-env"
+description = "Foundry script using private key env var"
+regex = "vm\\.envUint\\s*\\(\\s*[\"']PRIVATE_KEY[\"']\\s*\\)"
+
+[[content_rules]]
+id = "hardhat-accounts"
+description = "Hardhat config with inline accounts"
+regex = "(?i)accounts\\s*:\\s*\\[\\s*[\"']0x[0-9a-fA-F]{64}"
+
+# Path rules for web3 projects
+[[path_rules]]
+id = "foundry-config"
+description = "Foundry configuration (may contain RPC URLs with keys)"
+patterns = ["foundry.toml"]
+
+[[path_rules]]
+id = "hardhat-config"
+description = "Hardhat configuration (may contain private keys)"
+patterns = ["hardhat.config.js", "hardhat.config.ts", "hardhat.config.mjs"]
+
+[[path_rules]]
+id = "web3-secret-files"
+description = "Common web3 secret files"
+patterns = [".secret", "mnemonic.txt", "mnemonic", ".mnemonic", "secret.txt"]
+
+[[path_rules]]
+id = "brownie-config"
+description = "Brownie configuration"
+patterns = ["brownie-config.yaml"]
+
+[[path_rules]]
+id = "truffle-config"
+description = "Truffle configuration (may contain private keys)"
+patterns = ["truffle-config.js", "truffle.js"]
+
+[[path_rules]]
+id = "deployment-secrets"
+description = "Deployment secret files"
+patterns = ["deploy-key.*", "deployer.*", "deployment-secrets.*"]
