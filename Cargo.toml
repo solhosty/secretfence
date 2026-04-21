@@ -28,6 +28,12 @@ ignore = "0.4"
 anyhow = "1"
 ureq = { version = "3", optional = true }
 
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "z"
+
 [dev-dependencies]
 tempfile = "3"
 assert_cmd = "2"

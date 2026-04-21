@@ -59,26 +59,22 @@ pub fn validate_secrets(matches: &[SecretMatch], project_dir: &Path) -> Vec<Veri
         };
 
         let result = match rule_id {
-            "aws-access-key-id" => verify_aws_key(line, file_path, rule_id),
+            "aws-access-key-id" => Some(verify_aws_key(line, file_path, rule_id)),
             "github-token" | "github-oauth" | "github-fine-grained" => {
-                verify_github_token(line, file_path, rule_id)
+                Some(verify_github_token(line, file_path, rule_id))
             }
-            "slack-token" => verify_slack_token(line, file_path, rule_id),
-            "stripe-secret-key" => verify_stripe_key(line, file_path, rule_id),
-            "openai-api-key" => verify_openai_key(line, file_path, rule_id),
-            "anthropic-api-key" => verify_anthropic_key(line, file_path, rule_id),
-            "npm-token" => verify_npm_token(line, file_path, rule_id),
-            "sendgrid-api-key" => verify_sendgrid_key(line, file_path, rule_id),
-            _ => VerifyResult {
-                file_path: file_path.to_string(),
-                rule_id: rule_id.to_string(),
-                description: secret.description().to_string(),
-                status: VerifyStatus::NotVerifiable,
-                secret_preview: redact_line(line),
-            },
+            "slack-token" => Some(verify_slack_token(line, file_path, rule_id)),
+            "stripe-secret-key" => Some(verify_stripe_key(line, file_path, rule_id)),
+            "openai-api-key" => Some(verify_openai_key(line, file_path, rule_id)),
+            "anthropic-api-key" => Some(verify_anthropic_key(line, file_path, rule_id)),
+            "npm-token" => Some(verify_npm_token(line, file_path, rule_id)),
+            "sendgrid-api-key" => Some(verify_sendgrid_key(line, file_path, rule_id)),
+            _ => None, // Skip secrets we can't verify
         };
 
-        results.push(result);
+        if let Some(r) = result {
+            results.push(r);
+        }
     }
 
     print_verify_report(&results);
@@ -536,14 +532,15 @@ fn print_verify_report(results: &[VerifyResult]) {
         .iter()
         .filter(|r| matches!(r.status, VerifyStatus::Inactive))
         .collect();
-    let not_verifiable: Vec<&VerifyResult> = results
-        .iter()
-        .filter(|r| matches!(r.status, VerifyStatus::NotVerifiable))
-        .collect();
     let errors: Vec<&VerifyResult> = results
         .iter()
         .filter(|r| matches!(r.status, VerifyStatus::Error(_)))
         .collect();
+
+    if results.is_empty() {
+        println!("  No verifiable secret types found (GitHub, Slack, Stripe, OpenAI, etc.)\n");
+        return;
+    }
 
     if !active.is_empty() {
         println!("  {} {}", "ACTIVE SECRETS:".red().bold(), "(confirmed live credentials)".red());
@@ -572,15 +569,6 @@ fn print_verify_report(results: &[VerifyResult]) {
         println!();
     }
 
-    if !not_verifiable.is_empty() {
-        println!(
-            "  {} ({} secrets cannot be verified via API)",
-            "NOT VERIFIABLE:".dimmed(),
-            not_verifiable.len()
-        );
-        println!();
-    }
-
     if !errors.is_empty() {
         println!("  {}", "ERRORS:".yellow().bold());
         for r in &errors {
@@ -591,11 +579,14 @@ fn print_verify_report(results: &[VerifyResult]) {
         println!();
     }
 
-    println!(
-        "  Summary: {} active, {} inactive, {} unverifiable, {} errors\n",
-        active.len().to_string().red().bold(),
-        inactive.len().to_string().green(),
-        not_verifiable.len().to_string().dimmed(),
-        errors.len().to_string().yellow()
-    );
+    if active.is_empty() && inactive.is_empty() && errors.is_empty() {
+        println!("  No active or inactive credentials found.\n");
+    } else {
+        println!(
+            "  Verified: {} active, {} inactive, {} errors\n",
+            active.len().to_string().red().bold(),
+            inactive.len().to_string().green(),
+            errors.len().to_string().yellow()
+        );
+    }
 }

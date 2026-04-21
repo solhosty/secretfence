@@ -96,12 +96,24 @@ fn install_claude_hook(project_dir: &Path) -> Result<bool> {
         .as_array_mut()
         .unwrap();
 
-    // Check if already installed
-    let already_installed = pre_tool.iter().any(|hook| {
-        hook.get("hook")
+    // Check if already installed (check both old "hook" format and new "hooks" format)
+    let already_installed = pre_tool.iter().any(|entry| {
+        // Old format: { "hook": "sf hook check ..." }
+        let old = entry.get("hook")
             .and_then(|h| h.as_str())
             .map(|h| h.contains("sf hook check"))
-            .unwrap_or(false)
+            .unwrap_or(false);
+        // New format: { "hooks": [{ "command": "sf hook check ..." }] }
+        let new = entry.get("hooks")
+            .and_then(|h| h.as_array())
+            .map(|arr| arr.iter().any(|h| {
+                h.get("command")
+                    .and_then(|c| c.as_str())
+                    .map(|c| c.contains("sf hook check"))
+                    .unwrap_or(false)
+            }))
+            .unwrap_or(false);
+        old || new
     });
 
     if already_installed {
@@ -110,7 +122,12 @@ fn install_claude_hook(project_dir: &Path) -> Result<bool> {
 
     pre_tool.push(serde_json::json!({
         "matcher": "Read|Edit|Write|Bash",
-        "hook": "sf hook check --format claude"
+        "hooks": [
+            {
+                "type": "command",
+                "command": "sf hook check --format claude"
+            }
+        ]
     }));
 
     let output = serde_json::to_string_pretty(&settings)?;
@@ -159,12 +176,21 @@ fn remove_claude_hooks(settings: &mut serde_json::Value) -> bool {
     };
 
     let before = pre_tool.len();
-    pre_tool.retain(|hook| {
-        !hook
-            .get("hook")
+    pre_tool.retain(|entry| {
+        let old = entry.get("hook")
             .and_then(|h| h.as_str())
             .map(|h| h.contains("sf hook check"))
-            .unwrap_or(false)
+            .unwrap_or(false);
+        let new = entry.get("hooks")
+            .and_then(|h| h.as_array())
+            .map(|arr| arr.iter().any(|h| {
+                h.get("command")
+                    .and_then(|c| c.as_str())
+                    .map(|c| c.contains("sf hook check"))
+                    .unwrap_or(false)
+            }))
+            .unwrap_or(false);
+        !old && !new
     });
 
     pre_tool.len() != before
