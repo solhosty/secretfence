@@ -183,11 +183,6 @@ id = "docker-env"
 description = "Docker environment files"
 patterns = [".env.docker", "docker-compose.override.yml"]
 
-[[path_rules]]
-id = "ci-secrets"
-description = "CI/CD secret files"
-patterns = [".travis.yml", ".github/workflows/*.yml"]
-allow = []
 
 [[path_rules]]
 id = "cert-files"

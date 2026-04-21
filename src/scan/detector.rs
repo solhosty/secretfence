@@ -31,7 +31,15 @@ fn is_suppressed(rel_path: &Path, suppressed: &[glob::Pattern]) -> bool {
     let path_str = rel_path.to_str().unwrap_or("");
     let file_name = rel_path.file_name().and_then(|f| f.to_str()).unwrap_or("");
 
-    suppressed.iter().any(|p| p.matches(file_name) || p.matches(path_str))
+    let opts = glob::MatchOptions {
+        case_sensitive: true,
+        require_literal_separator: false,
+        require_literal_leading_dot: false,
+    };
+
+    suppressed.iter().any(|p| {
+        p.matches_with(file_name, opts) || p.matches_with(path_str, opts)
+    })
 }
 
 pub fn scan_directory(path: &Path, engine: &RuleEngine) -> Result<Vec<SecretMatch>> {
