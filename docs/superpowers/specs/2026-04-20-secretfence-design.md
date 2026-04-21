@@ -35,7 +35,7 @@ The only hook-based scanner (GitGuardian's `ggshield ai-hook`) requires a GitGua
 |------|--------------------------|
 | Pattern quality | ggshield's 500+ patterns are battle-tested at scale with real-world false positive tuning. Our ported gitleaks rules may have more noise. |
 | Ecosystem integration | ggshield has GitHub Actions, pre-commit, CI/CD integrations. secretfence starts with CLI only. |
-| Validation | ggshield validates secrets against live APIs (e.g., checks if an AWS key is actually active). secretfence does regex-only detection. |
+| Validation | ggshield validates secrets against live APIs by default. secretfence supports this via `--verify` flag but it's opt-in. |
 | Maintenance | GitGuardian has a full team maintaining pattern databases. secretfence relies on community + gitleaks upstream. |
 | Ignore file generation | aiignore-cli already does this well and is established. secretfence's Layer 1 is not novel. |
 | Windows sandbox | No real enforcement — best-effort env scrubbing only. macOS sandbox-exec is deprecated. |

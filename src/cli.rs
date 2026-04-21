@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
     name = "sf",
     about = "secretfence — Fully local secret protection for AI coding tools",
     version,
-    after_help = "https://github.com/Cyfrin/secretfence"
+    after_help = "https://github.com/solhosty/secretfence"
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -27,6 +27,10 @@ pub enum Commands {
         /// Output in JSON format
         #[arg(long)]
         json: bool,
+
+        /// Verify detected secrets against live APIs (requires network access)
+        #[arg(long)]
+        verify: bool,
 
         /// Directory to scan (defaults to current directory)
         #[arg(default_value = ".")]

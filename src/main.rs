@@ -4,6 +4,7 @@ mod hook;
 mod rules;
 mod sandbox;
 mod scan;
+mod verify;
 
 use std::path::Path;
 use std::process;
@@ -29,8 +30,9 @@ fn run(cli: Cli) -> Result<()> {
             fix,
             tools,
             json,
+            verify,
             path,
-        } => cmd_scan(&path, fix, tools.as_deref(), json),
+        } => cmd_scan(&path, fix, tools.as_deref(), json, verify),
 
         Commands::Hook { action } => match action {
             HookAction::Install { tools } => {
@@ -63,7 +65,7 @@ fn run(cli: Cli) -> Result<()> {
     }
 }
 
-fn cmd_scan(path: &str, fix: bool, tools: Option<&str>, json: bool) -> Result<()> {
+fn cmd_scan(path: &str, fix: bool, tools: Option<&str>, json: bool, do_verify: bool) -> Result<()> {
     let project_dir = Path::new(path).canonicalize()?;
 
     let (content_rules, path_rules) = rules::load_rules()?;
@@ -81,6 +83,10 @@ fn cmd_scan(path: &str, fix: bool, tools: Option<&str>, json: bool) -> Result<()
             );
         }
         scan::reporter::print_report(&matches);
+    }
+
+    if do_verify && !matches.is_empty() {
+        verify::validate_secrets(&matches, &project_dir);
     }
 
     if fix {
