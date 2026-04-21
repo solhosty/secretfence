@@ -90,7 +90,23 @@ fn cmd_scan(path: &str, fix: bool, tools: Option<&str>, json: bool, do_verify: b
     }
 
     if fix {
-        let patterns = engine.denied_patterns();
+        // Collect both glob patterns (from path rules) AND specific file paths (from matches)
+        let mut patterns = engine.denied_patterns();
+
+        // Add specific file paths that had content matches
+        let mut matched_files: Vec<String> = matches
+            .iter()
+            .map(|m| m.file_path().to_string())
+            .collect();
+        matched_files.sort();
+        matched_files.dedup();
+
+        for file in &matched_files {
+            if !patterns.contains(file) {
+                patterns.push(file.clone());
+            }
+        }
+
         scan::generators::generate_ignore_files(&patterns, &project_dir, tools)?;
     }
 

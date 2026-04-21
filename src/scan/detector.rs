@@ -8,8 +8,35 @@ use crate::rules::{RuleEngine, SecretMatch};
 
 const MAX_FILE_SIZE: u64 = 1_048_576; // 1MB
 
+/// Load patterns from .llmignore if it exists, to suppress already-handled findings.
+fn load_suppressed_patterns(project_dir: &Path) -> Vec<glob::Pattern> {
+    let llmignore = project_dir.join(".llmignore");
+    if !llmignore.exists() {
+        return Vec::new();
+    }
+
+    let content = match fs::read_to_string(&llmignore) {
+        Ok(c) => c,
+        Err(_) => return Vec::new(),
+    };
+
+    content
+        .lines()
+        .filter(|l| !l.starts_with('#') && !l.trim().is_empty())
+        .filter_map(|l| glob::Pattern::new(l.trim()).ok())
+        .collect()
+}
+
+fn is_suppressed(rel_path: &Path, suppressed: &[glob::Pattern]) -> bool {
+    let path_str = rel_path.to_str().unwrap_or("");
+    let file_name = rel_path.file_name().and_then(|f| f.to_str()).unwrap_or("");
+
+    suppressed.iter().any(|p| p.matches(file_name) || p.matches(path_str))
+}
+
 pub fn scan_directory(path: &Path, engine: &RuleEngine) -> Result<Vec<SecretMatch>> {
     let mut matches = Vec::new();
+    let suppressed = load_suppressed_patterns(path);
 
     let walker = WalkBuilder::new(path)
         .hidden(false)
@@ -26,15 +53,18 @@ pub fn scan_directory(path: &Path, engine: &RuleEngine) -> Result<Vec<SecretMatc
 
         let entry_path = entry.path();
 
-        // Skip directories
         if entry_path.is_dir() {
             continue;
         }
 
-        // Get path relative to scan root
         let rel_path = entry_path
             .strip_prefix(path)
             .unwrap_or(entry_path);
+
+        // Skip files already covered by .llmignore
+        if is_suppressed(rel_path, &suppressed) {
+            continue;
+        }
 
         // Check path rules
         if let Some(path_match) = engine.check_path(rel_path) {
@@ -55,14 +85,13 @@ pub fn scan_directory(path: &Path, engine: &RuleEngine) -> Result<Vec<SecretMatc
             continue;
         }
 
-        // Skip binary files
         if is_likely_binary(entry_path) {
             continue;
         }
 
         let content = match fs::read_to_string(entry_path) {
             Ok(c) => c,
-            Err(_) => continue, // Skip files we can't read as UTF-8
+            Err(_) => continue,
         };
 
         for content_match in engine.check_content(&content) {
